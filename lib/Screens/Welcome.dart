@@ -8,7 +8,7 @@ class Welcome extends StatefulWidget {
   _WelcomeState createState() => _WelcomeState();
 }
 
-class _WelcomeState extends State<Welcome> {
+class _WelcomeState extends State<Welcome> with SingleTickerProviderStateMixin {
 
   // Buttons
   Widget welcomeBtn(String text,String routerName){
@@ -38,9 +38,12 @@ class _WelcomeState extends State<Welcome> {
         Center(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
-            child: SizedBox(
-              height: 150.0,
-              child: Image.asset("Assets/img1.png",),
+            child: Hero(
+              tag:  "logo",
+              child: SizedBox(
+                height: 150.0,
+                child: Image.asset("Assets/img1.png",),
+              ),
             ),
           ),
         ),
@@ -51,6 +54,29 @@ class _WelcomeState extends State<Welcome> {
       ],
     );
  }
+
+//  // Animating opacity variable for the controller
+//  AnimationController controller;
+
+  @override
+  void initState() {
+//    controller = AnimationController(
+//      duration: Duration(seconds: 1),
+//      vsync: this,
+//      upperBound: 150.0
+//    );
+//
+//    // To run  animation
+//    controller.forward();
+//
+//    // Event lisner for animation
+//    controller.addListener((){
+//      print(controller.value);
+//      setState(() {});
+//    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

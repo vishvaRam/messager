@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'Chat.dart';
 
 class Regester extends StatefulWidget {
   static final id = "Regester";
@@ -8,6 +10,11 @@ class Regester extends StatefulWidget {
 
 class _RegesterState extends State<Regester> {
 
+  bool isLoging =false;
+  final _auth = FirebaseAuth.instance;
+  String email;
+  String password;
+
   // Image Icon
   Widget imageIcon() {
     return Column(
@@ -15,10 +22,13 @@ class _RegesterState extends State<Regester> {
         Center(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
-            child: SizedBox(
-              height: 150.0,
-              child: Image.asset(
-                "Assets/img1.png",
+            child: Hero(
+              tag: "logo",
+              child: SizedBox(
+                height: 150.0,
+                child: Image.asset(
+                  "Assets/img1.png",
+                ),
               ),
             ),
           ),
@@ -33,6 +43,15 @@ class _RegesterState extends State<Regester> {
       ],
     );
   }
+
+  Widget loading(){
+    return Center(
+      child: CircularProgressIndicator(backgroundColor: Colors.black45,),
+    );
+  }
+
+  final TextEditingController _maileController = new TextEditingController();
+  final TextEditingController _passController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +68,12 @@ class _RegesterState extends State<Regester> {
                 height: 24.0,
               ),
               TextField(
+                controller: _maileController,
+                keyboardType: TextInputType.emailAddress,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 22.0),
                 onChanged: (value) {
-                  print(value);
+                  email = value;
                 },
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
@@ -75,8 +98,12 @@ class _RegesterState extends State<Regester> {
                 height: 24.0,
               ),
               TextField(
+                controller: _passController,
+                textAlign: TextAlign.center,
+                obscureText: true,
+                style: TextStyle(fontSize: 22.0),
                 onChanged: (value) {
-                  //Do something with the user input.
+                  password = value;
                 },
                 decoration: InputDecoration(
                   hintText: 'Enter your password',
@@ -106,10 +133,31 @@ class _RegesterState extends State<Regester> {
                 elevation: 4.0,
                 child: MaterialButton(
                   color: Colors.blue,
-                  onPressed: (){},
+                  onPressed: () async{
+                      try{
+                        //Loading to true
+                        setState(() {
+                          isLoging = true;
+                        });
+                        final User = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+                        if(User != null){
+                          Navigator.pushNamed(context, Chat.id );
+                        }
+                        // Clearing the text
+                        _maileController.clear();
+                        _passController.clear();
+
+                      }catch (e){
+                        print(e);
+                      }
+                      // Loading to false
+                      setState(() {
+                        isLoging = false;
+                      });
+                  },
                   minWidth: 300.0,
                   height: 50.0,
-                  child: Text("Register",style:  TextStyle(fontSize: 24.0),),
+                  child: isLoging ? loading(): Text("Register",style:  TextStyle(fontSize: 24.0),),
                 ),
               )
             ],

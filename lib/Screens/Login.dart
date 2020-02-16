@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'Welcome.dart';
+import 'Chat.dart';
+
 
 class Login extends StatefulWidget {
   static final id = "Login";
@@ -8,7 +9,12 @@ class Login extends StatefulWidget {
   _LoginState createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginState extends State<Login>{
+
+  String email,password;
+  bool isLoading = false;
+  final _auth = FirebaseAuth.instance;
+
   // Icon Image
   Widget imageIcon() {
     return Column(
@@ -16,10 +22,13 @@ class _LoginState extends State<Login> {
         Center(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
-            child: SizedBox(
-              height: 150.0,
-              child: Image.asset(
-                "Assets/img1.png",
+            child: Hero(
+              tag: "logo",
+              child: SizedBox(
+                height:150.0,
+                child: Image.asset(
+                  "Assets/img1.png",
+                ),
               ),
             ),
           ),
@@ -34,6 +43,13 @@ class _LoginState extends State<Login> {
       ],
     );
   }
+
+  Widget loading(){
+    return Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+  final TextEditingController _passController= new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +66,11 @@ class _LoginState extends State<Login> {
                 height: 24.0,
               ),
               TextField(
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 22.0),
+                keyboardType: TextInputType.emailAddress,
                 onChanged: (value) {
-                  print(value);
+                  email = value;
                 },
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
@@ -76,8 +95,12 @@ class _LoginState extends State<Login> {
                 height: 24.0,
               ),
               TextField(
+                controller: _passController,
+                textAlign: TextAlign.center,
+                obscureText: true,
+                style: TextStyle(fontSize: 22.0),
                 onChanged: (value) {
-                  //Do something with the user input.
+                  password = value;
                 },
                 decoration: InputDecoration(
                   hintText: 'Enter your password',
@@ -107,10 +130,26 @@ class _LoginState extends State<Login> {
                 elevation: 4.0,
                 child: MaterialButton(
                   color: Colors.blue,
-                  onPressed: (){},
+                  onPressed: () async{
+                    try{
+                      setState(() {
+                        isLoading = true;
+                      });
+                      final user =await _auth.signInWithEmailAndPassword(email: email, password: password);
+                      if(user != null ){
+                        Navigator.pushNamed(context, Chat.id);
+                      }
+                      _passController.clear();
+                    }catch(e){
+                      print(e);
+                    }
+                    setState(() {
+                      isLoading=false;
+                    });
+                  },
                   minWidth: 300.0,
                   height: 50.0,
-                  child: Text("Login",style:  TextStyle(fontSize: 24.0),),
+                  child: isLoading ? loading() :Text("Login",style:  TextStyle(fontSize: 24.0),)
                 ),
               )
             ],
