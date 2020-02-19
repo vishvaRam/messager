@@ -48,7 +48,7 @@ class _ChatState extends State<Chat> {
 
   Widget send(){
     return Container(
-      height: 75.0,
+      height: 60.0,
       alignment: Alignment.bottomCenter,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,12 +67,12 @@ class _ChatState extends State<Chat> {
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderSide:
-                    BorderSide(color: Theme.of(context).accentColor, width: 1.0),
+                    BorderSide(color: Colors.lightBlue, width: 1.0),
                     borderRadius: BorderRadius.all(Radius.circular(32.0)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide:
-                    BorderSide(color: Theme.of(context).accentColor, width: 2.0),
+                    BorderSide(color:Colors.lightBlue, width: 2.0),
                     borderRadius: BorderRadius.all(Radius.circular(32.0)),
                   ),
                 ),
@@ -91,7 +91,7 @@ class _ChatState extends State<Chat> {
                     setState(() {
                       isLoading = true;
                     });
-                    await _dB.collection('messages').add({'text':text,"sender":loggedInUser.email});
+                    await _dB.collection('messages').add({'text':text,"sender":loggedInUser.email,"createdAt":Timestamp.now()});
                     _textController.clear();
                     setState(() {
                       isLoading =false;
@@ -120,21 +120,39 @@ class _ChatState extends State<Chat> {
   }
 
   Widget _buildList(BuildContext context, DocumentSnapshot document) {
-    if(document['sender'] == loggedInUser.email){
-      return Material(
-        color: Colors.blue,
-        child: ListTile(
-          title: Text(document['text']),
-          subtitle: Text(document['sender']),
-        ),
-      );
+
+    bool cUser;
+    String currentUser= loggedInUser.email;
+    if(document["sender"]==currentUser){
+      cUser = true;
+    }else{
+      cUser = false;
     }
-    else{
-      return ListTile(
-        title: Text(document['text']),
-        subtitle: Text(document['sender']),
-      );
-    }
+
+    return Padding(
+      padding: const EdgeInsets.only(right:12.0,bottom: 12.0,left: 12.0),
+      child: Column(
+        crossAxisAlignment: cUser? CrossAxisAlignment.end: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(document['sender'],style: TextStyle(fontSize: 14.0,color: Colors.white70),),
+          Padding(
+            padding: const EdgeInsets.only(top:5.0),
+            child: Material(
+              color: cUser? Colors.blue : Colors.white30,
+              borderRadius: cUser?
+              BorderRadius.only(topLeft: Radius.circular(30.0),bottomLeft: Radius.circular(30.0),bottomRight: Radius.circular(30.0))
+                  :
+              BorderRadius.only(topRight: Radius.circular(30.0),bottomLeft: Radius.circular(30.0),bottomRight: Radius.circular(30.0)),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(document['text'],style: TextStyle(fontSize: 18.0),),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+
   }
 
   @override
@@ -161,7 +179,7 @@ class _ChatState extends State<Chat> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder(
-                  stream: _dB.collection("messages").snapshots(),
+                  stream: _dB.collection("messages").orderBy('createdAt',descending: true).snapshots(),
                   builder: (context,snapshot){
                     if(!snapshot.hasData){
                        return Center(
@@ -169,6 +187,7 @@ class _ChatState extends State<Chat> {
                        );
                     }else{
                       return ListView.builder(
+                        reverse: true,
                           itemCount: snapshot.data.documents.length,
                           itemBuilder: (context,i){
                             print(snapshot.data.documents.length);
@@ -181,7 +200,7 @@ class _ChatState extends State<Chat> {
               ),
             ),
             Container(
-              height: 90.0,
+              height: 65.0,
               child: Align(
               alignment: Alignment.bottomCenter,
               child: Padding(

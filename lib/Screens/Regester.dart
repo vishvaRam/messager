@@ -139,8 +139,8 @@ class _RegesterState extends State<Regester> {
                         setState(() {
                           isLoging = true;
                         });
-                        final User = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-                        if(User != null){
+                        final user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+                        if(user != null){
                           Navigator.pushNamed(context, Chat.id );
                         }
                         // Clearing the text
